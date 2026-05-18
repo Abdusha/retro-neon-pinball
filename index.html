@@ -104,7 +104,7 @@
             </div>
 
             <!-- Controls Guide -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 hidden lg:flex flex-col gap-3">
                 <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Cabinet Controls</span>
                 
                 <div class="flex flex-col gap-1.5 text-xs">
@@ -179,7 +179,7 @@
                 </div>
 
                 <!-- NEW TACTICAL TOUCH DECK (Responsive touch controllers always visible on mobile / accessible) -->
-                <div class="w-full bg-slate-900 border-t-2 border-slate-800 p-2.5 flex flex-col gap-2 z-30 select-none">
+                <div class="w-full bg-slate-900 border-t-2 border-slate-800 p-2.5 flex lg:hidden flex-col gap-2 z-30 select-none">
                     <div class="flex items-center justify-between gap-2">
                         <!-- Left Flipper Button -->
                         <button id="mobile-left-flipper" class="flex-1 py-4 bg-gradient-to-b from-cyan-500 to-blue-600 active:from-cyan-400 active:to-blue-500 text-slate-950 font-black rounded-xl text-sm uppercase tracking-widest shadow-lg border border-cyan-400/30 transition-all active:scale-95 duration-75 flex items-center justify-center gap-2">
@@ -264,7 +264,7 @@
                     <!-- Highscores rendered here -->
                 </div>
 
-                <div class="mt-2 flex flex-col gap-2">
+                <div class="mt-2 hidden lg:flex flex-col gap-2">
                     <button id="btn-nudge" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
                         <span>💥 Nudge Table</span>
                     </button>
