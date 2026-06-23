@@ -1,0 +1,59 @@
+/* ==========================================================================
+   Retro Neon Pinball — Custom Styles
+   (TailwindCSS loaded via CDN handles utility classes in HTML)
+   ========================================================================== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at center, #110e24 0%, #050409 100%);
+    overflow-x: hidden;
+    touch-action: manipulation;
+}
+
+/* Typography */
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+.arcade-font {
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* Neon glowing effects */
+.neon-border-pink {
+    box-shadow: 0 0 15px #f43f5e, inset 0 0 15px #f43f5e;
+}
+.neon-border-blue {
+    box-shadow: 0 0 15px #06b6d4, inset 0 0 15px #06b6d4;
+}
+.neon-border-orange {
+    box-shadow: 0 0 15px #f97316, inset 0 0 15px #f97316;
+}
+.neon-text-pink {
+    text-shadow: 0 0 8px #f43f5e;
+}
+.neon-text-blue {
+    text-shadow: 0 0 8px #06b6d4;
+}
+.neon-text-yellow {
+    text-shadow: 0 0 8px #eab308;
+}
+.neon-text-orange {
+    text-shadow: 0 0 8px #f97316;
+}
+
+/* Canvas rendering */
+canvas {
+    image-rendering: pixelated;
+}
+
+/* Custom scrollbar for leaderboard */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+}
+::-webkit-scrollbar-thumb {
+    background: #f43f5e;
+    border-radius: 3px;
+}

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retro Neon Pinball Cabinet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col items-center justify-between p-2 md:p-4 select-none">
+
+    <!-- MAIN CABINET WRAPPER -->
+    <div class="w-full max-w-6xl flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center my-auto">
+        
+        <!-- SIDE PANEL: STATS & CONTROLS -->
+        <div class="w-full lg:w-72 flex flex-col gap-3 order-2 lg:order-1 justify-between">
+            <!-- Diagnostics panel -->
+            <div class="bg-slate-900/90 border border-cyan-500/50 rounded-2xl p-4 neon-border-blue flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">Diagnostics</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase">Multiplier</div>
+                        <div id="stats-multiplier" class="text-lg font-black text-rose-500 neon-text-pink orbitron">X1</div>
+                    </div>
+                    <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase">Balls Left</div>
+                        <div id="stats-balls" class="text-lg font-black text-cyan-400 neon-text-blue orbitron">3</div>
+                    </div>
+                </div>
+
+                <!-- Progressive Target Tracker -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col gap-1">
+                    <div class="text-xs text-slate-400 uppercase flex justify-between">
+                        <span>Drop Targets</span>
+                        <span id="target-progress" class="text-cyan-400">0/3</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                        <div id="target-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Quantum Scoop Status Panel -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-orange-500/30 flex flex-col gap-1 mt-1">
+                    <div class="text-xs text-slate-400 uppercase flex justify-between">
+                        <span>Quantum Scoop</span>
+                        <span id="scoop-status-text" class="text-slate-500 font-bold uppercase orbitron">Locked</span>
+                    </div>
+                    <div class="text-[10px] text-orange-400 italic" id="scoop-hint">Power up targets to trigger multiball!</div>
+                </div>
+            </div>
+
+            <!-- Controls Guide -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 hidden lg:flex flex-col gap-3">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Cabinet Controls</span>
+                
+                <div class="flex flex-col gap-1.5 text-xs">
+                    <div class="flex justify-between items-center py-1 border-b border-slate-850">
+                        <span class="text-slate-300">Left Flipper</span>
+                        <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600 text-cyan-400 font-bold orbitron">Z / ←</kbd>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-850">
+                        <span class="text-slate-300">Right Flipper</span>
+                        <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600 text-rose-400 font-bold orbitron">/ / →</kbd>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-850">
+                        <span class="text-slate-300">Plunger</span>
+                        <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600 text-yellow-400 font-bold orbitron">↓ / Space</kbd>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-850">
+                        <span class="text-slate-300">Nudge</span>
+                        <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600 text-emerald-400 font-bold orbitron">X</kbd>
+                    </div>
+                </div>
+
+                <div class="mt-2 flex flex-col gap-2">
+                    <button id="btn-audio" class="w-full bg-slate-850 hover:bg-slate-800 text-slate-300 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-750 transition active:scale-95">
+                        <span id="audio-icon">🔊</span> <span id="audio-status">Audio: ON</span>
+                    </button>
+                    <button id="btn-restart" class="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-rose-500/30 transition active:scale-95">
+                        🔄 Restart Table
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTRAL PINBALL TABLE CABINET (COMPACTED VERTICALLY) -->
+        <div class="flex-1 flex flex-col items-center justify-center order-1 lg:order-2">
+            
+            <!-- FLEX COMPACT CONTAINER PREVENTS VERTICAL CROPPING -->
+            <div class="relative w-full max-w-[430px] bg-slate-950 border-4 border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+                
+                <!-- NEW COMPACT HUD HEADER (Replaced bulky DMD to save vertical space) -->
+                <div class="w-full bg-slate-950/90 border-b-2 border-slate-800 p-3 flex flex-row items-center justify-between gap-2 z-20 relative">
+                    <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.15)_50%)] bg-[size:100%_4px] pointer-events-none"></div>
+                    
+                    <div class="flex flex-col">
+                        <span class="text-[8px] font-bold text-amber-500/80 uppercase tracking-widest arcade-font">Score</span>
+                        <div id="dmd-score" class="text-xl font-black text-amber-500 tracking-wider arcade-font neon-text-yellow">000,000</div>
+                    </div>
+                    
+                    <div class="flex-1 px-2 text-center overflow-hidden">
+                        <div id="dmd-message" class="text-[9px] font-bold text-cyan-400 tracking-wide uppercase arcade-font truncate neon-text-blue">
+                            READY PLAYER 1
+                        </div>
+                    </div>
+
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-[8px] font-bold text-rose-500/80 uppercase tracking-widest arcade-font">Pilot</span>
+                        <span id="header-user" class="text-xs font-black text-rose-500 tracking-wider orbitron truncate max-w-[80px]">PILOT_X</span>
+                    </div>
+                </div>
+
+                <!-- Grid background under canvas -->
+                <div class="absolute inset-x-0 top-14 bottom-0 pointer-events-none opacity-5 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                
+                <!-- Adaptive Playfield Wrapper (Guarantees fits inside viewports) -->
+                <div class="relative w-full overflow-hidden flex justify-center items-center bg-slate-950/50 max-h-[60vh] sm:max-h-[65vh] md:max-h-[70vh] lg:max-h-[72vh] aspect-[9/17]">
+                    <canvas id="pinball-canvas" class="w-full h-full object-contain block"></canvas>
+                    
+                    <!-- INVISIBLE TOUCH ZONES OVER CANVAS -->
+                    <div class="absolute inset-0 pointer-events-none flex select-none z-30">
+                        <div id="touch-left" class="w-1/2 h-full pointer-events-auto cursor-pointer active:bg-cyan-500/5 transition duration-100"></div>
+                        <div id="touch-right" class="w-1/2 h-full pointer-events-auto cursor-pointer active:bg-rose-500/5 transition duration-100"></div>
+                    </div>
+                </div>
+
+                <!-- NEW TACTICAL TOUCH DECK (Responsive touch controllers always visible on mobile / accessible) -->
+                <div class="w-full bg-slate-900 border-t-2 border-slate-800 p-2.5 flex lg:hidden flex-col gap-2 z-30 select-none">
+                    <div class="flex items-center justify-between gap-2">
+                        <!-- Left Flipper Button -->
+                        <button id="mobile-left-flipper" class="flex-1 py-4 bg-gradient-to-b from-cyan-500 to-blue-600 active:from-cyan-400 active:to-blue-500 text-slate-950 font-black rounded-xl text-sm uppercase tracking-widest shadow-lg border border-cyan-400/30 transition-all active:scale-95 duration-75 flex items-center justify-center gap-2">
+                            <span>◀</span> <span>LEFT</span>
+                        </button>
+                        
+                        <!-- Mini Plunger Launch Trigger -->
+                        <button id="mobile-launch-flipper" class="px-4 py-4 bg-gradient-to-b from-amber-500 to-yellow-600 active:from-amber-400 active:to-yellow-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest shadow-lg border border-yellow-400/30 transition-all active:scale-95 duration-75 flex items-center justify-center gap-1">
+                            <span>🚀</span> <span>LAUNCH</span>
+                        </button>
+
+                        <!-- Right Flipper Button -->
+                        <button id="mobile-right-flipper" class="flex-1 py-4 bg-gradient-to-b from-rose-500 to-pink-600 active:from-rose-400 active:to-pink-500 text-slate-950 font-black rounded-xl text-sm uppercase tracking-widest shadow-lg border border-rose-400/30 transition-all active:scale-95 duration-75 flex items-center justify-center gap-2">
+                            <span>RIGHT</span> <span>▶</span>
+                        </button>
+                    </div>
+
+                    <!-- Compact Nudge Button -->
+                    <button id="mobile-nudge-btn" class="w-full py-2 bg-slate-950 border border-emerald-500/40 text-emerald-400 active:bg-emerald-500/20 rounded-lg text-[10px] uppercase font-bold tracking-widest transition flex items-center justify-center gap-2">
+                        <span>💥 NUDGE TABLE</span>
+                    </button>
+                </div>
+
+                <!-- START SCREEN INTERACTIVE OVERLAY WITH USERNAME INPUT -->
+                <div id="start-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center z-50 p-6 text-center transition-all duration-300">
+                    <h1 class="text-2xl sm:text-3xl font-black text-cyan-400 tracking-widest arcade-font mb-2 neon-text-blue">NEON PINBALL</h1>
+                    <p class="text-[10px] text-rose-500 uppercase tracking-widest arcade-font mb-6">Retro Cabinet Sim</p>
+                    
+                    <div class="w-full max-w-xs flex flex-col gap-4 mb-6">
+                        <button id="btn-signin-signup" class="w-full py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl neon-border-pink active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-3">
+                            <span>🔐 Sign In / Sign Up</span>
+                        </button>
+                    </div>
+
+                    <!-- Guest Login -->
+                    <div class="w-full max-w-xs flex flex-col items-center">
+                        <p class="text-[10px] text-cyan-400 uppercase tracking-widest arcade-font mb-3 text-center">Or Play as Guest</p>
+                        <button id="btn-start-game" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-black rounded-xl text-xs uppercase tracking-widest border border-cyan-500/30 active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>🎮 Login as Guest</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SIGN IN OVERLAY -->
+                <div id="signin-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex-col items-center justify-center z-50 p-6 text-center transition-all duration-300">
+                    <h1 class="text-2xl sm:text-3xl font-black text-rose-500 tracking-widest arcade-font mb-6 neon-text-pink">SIGN IN</h1>
+                    
+                    <div class="w-full max-w-xs bg-slate-900/90 border border-rose-500/30 rounded-2xl p-5 mb-6 shadow-xl flex flex-col gap-4 items-center">
+                        <div class="w-full text-left">
+                            <label for="signin-email" class="text-[10px] text-rose-400 uppercase tracking-widest arcade-font mb-2 block">Email</label>
+                            <input id="signin-email" type="email" placeholder="PILOT@NEON.COM" class="w-full bg-slate-950 border-2 border-rose-500/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-rose-400 transition-colors duration-200 uppercase orbitron">
+                        </div>
+                        <div class="w-full text-left">
+                            <label for="signin-password" class="text-[10px] text-rose-400 uppercase tracking-widest arcade-font mb-2 block">Password</label>
+                            <input id="signin-password" type="password" placeholder="••••••••" class="w-full bg-slate-950 border-2 border-rose-500/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-rose-400 transition-colors duration-200 orbitron">
+                        </div>
+                        
+                        <button id="btn-do-signin" class="w-full py-4 mt-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest shadow-xl neon-border-pink active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>🔐 Login</span>
+                        </button>
+                    </div>
+                    
+                    <button id="btn-back-from-signin" class="text-[10px] text-slate-500 hover:text-rose-400 uppercase tracking-widest transition">◀ Back to Menu</button>
+                </div>
+
+                <!-- SIGN UP OVERLAY -->
+                <div id="signup-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex-col items-center justify-center z-50 p-6 text-center transition-all duration-300">
+                    <h1 class="text-2xl sm:text-3xl font-black text-rose-500 tracking-widest arcade-font mb-6 neon-text-pink">SIGN UP</h1>
+                    
+                    <div class="w-full max-w-xs bg-slate-900/90 border border-rose-500/30 rounded-2xl p-5 mb-6 shadow-xl flex flex-col gap-4 items-center">
+                        <div class="w-full text-left">
+                            <label for="signup-name" class="text-[10px] text-rose-400 uppercase tracking-widest arcade-font mb-2 block">Display Name</label>
+                            <input id="signup-name" type="text" maxlength="10" placeholder="PILOT_X" class="w-full bg-slate-950 border-2 border-rose-500/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-rose-400 transition-colors duration-200 uppercase orbitron">
+                        </div>
+                        <div class="w-full text-left">
+                            <label for="signup-email" class="text-[10px] text-rose-400 uppercase tracking-widest arcade-font mb-2 block">Email</label>
+                            <input id="signup-email" type="email" placeholder="PILOT@NEON.COM" class="w-full bg-slate-950 border-2 border-rose-500/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-rose-400 transition-colors duration-200 uppercase orbitron">
+                        </div>
+                        <div class="w-full text-left">
+                            <label for="signup-password" class="text-[10px] text-rose-400 uppercase tracking-widest arcade-font mb-2 block">Password</label>
+                            <input id="signup-password" type="password" placeholder="••••••••" class="w-full bg-slate-950 border-2 border-rose-500/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-rose-400 transition-colors duration-200 orbitron">
+                        </div>
+                        
+                        <button id="btn-do-signup" class="w-full py-4 mt-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest shadow-xl neon-border-pink active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>📝 Register</span>
+                        </button>
+                    </div>
+                    
+                    <button id="btn-back-from-signup" class="text-[10px] text-slate-500 hover:text-rose-400 uppercase tracking-widest transition">◀ Back to Menu</button>
+                </div>
+
+                <!-- SIGN IN / SIGN UP SELECTION OVERLAY -->
+                <div id="auth-select-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex-col items-center justify-center z-50 p-6 text-center transition-all duration-300">
+                    <h1 class="text-2xl sm:text-3xl font-black text-rose-500 tracking-widest arcade-font mb-6 neon-text-pink">ACCOUNT</h1>
+                    
+                    <div class="w-full max-w-xs flex flex-col gap-4 mb-6">
+                        <button id="btn-go-signin" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-rose-400 font-black rounded-xl text-xs uppercase tracking-widest border border-rose-500/30 active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>🔐 Sign In</span>
+                        </button>
+                        <button id="btn-go-signup" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-pink-400 font-black rounded-xl text-xs uppercase tracking-widest border border-pink-500/30 active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>📝 Sign Up</span>
+                        </button>
+                    </div>
+                    
+                    <button id="btn-back-from-auth" class="text-[10px] text-slate-500 hover:text-rose-400 uppercase tracking-widest transition">◀ Back to Menu</button>
+                </div>
+
+                <!-- GAME OVER INTERACTIVE OVERLAY -->
+                <div id="gameover-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex-col items-center justify-center z-50 p-6 text-center transition-all duration-300">
+                    <h1 class="text-3xl sm:text-4xl font-black text-rose-500 tracking-wider arcade-font mb-4 neon-text-pink animate-pulse">GAME OVER</h1>
+                    
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 mb-6 w-11/12 max-w-sm flex flex-col items-center">
+                        <span id="go-username-label" class="text-xs uppercase tracking-widest text-slate-400 mb-1">PILOT</span>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-500 mb-2">Final Score</span>
+                        <div id="go-final-score" class="text-2xl sm:text-3xl font-black text-amber-500 tracking-widest orbitron neon-text-yellow">
+                            0
+                        </div>
+                        <div id="go-highscore-badge" class="hidden mt-3 px-3 py-1 bg-yellow-500/20 border border-yellow-500 text-yellow-400 text-[9px] uppercase tracking-widest font-black rounded-full animate-bounce">
+                            🏆 New High Score! 🏆
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 w-full max-w-xs">
+                        <button id="btn-play-again" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl neon-border-blue active:scale-95 hover:scale-105 transition duration-150 flex items-center justify-center gap-2">
+                            <span>🔄 Play Again</span>
+                        </button>
+                        <button id="btn-quit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-rose-500 font-black rounded-2xl text-xs uppercase tracking-widest border border-rose-500/30 active:scale-95 transition duration-150 flex items-center justify-center gap-2">
+                            <span>🚪 Quit Session</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TILT WARNING INDICATOR -->
+                <div id="tilt-overlay" class="absolute inset-0 bg-red-950/80 pointer-events-none flex flex-col items-center justify-center opacity-0 transition-opacity duration-300 z-40">
+                    <h2 class="text-4xl sm:text-5xl font-black text-red-500 tracking-widest arcade-font animate-bounce neon-text-pink">TILT!</h2>
+                    <p class="text-xs sm:text-sm text-red-400 tracking-wide uppercase mt-2 font-semibold">Flipper Controls Disabled</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDE PANEL: HIGH SCORES -->
+        <div class="w-full lg:w-72 flex flex-col gap-4 order-3 justify-between">
+            <div class="bg-slate-900/90 border border-rose-500/50 rounded-2xl p-4 neon-border-pink flex flex-col gap-3 h-full">
+                <span class="text-xs uppercase tracking-wider text-rose-400 font-semibold flex items-center gap-2">
+                    🏆 Hall of Fame
+                </span>
+                
+                <div id="highscores-container" class="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
+                    <!-- Highscores rendered here -->
+                </div>
+
+                <div class="mt-2 hidden lg:flex flex-col gap-2">
+                    <button id="btn-nudge" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
+                        <span>💥 Nudge Table</span>
+                    </button>
+                    <button id="btn-plunger" class="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
+                        <span>🚀 Launch Plunger</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER/INFO -->
+    <footer class="text-center text-[10px] text-slate-500 py-2 max-w-lg mt-2">
+        Synthesized Retro Pinball Table. Physics engine computed at 300Hz using custom dynamic sub-stepping algorithms.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script src="/js/audio.js"></script>
+    <script src="/js/entities.js"></script>
+    <script src="/js/physics.js"></script>
+    <script src="/js/renderer.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/input.js"></script>
+    <script src="/js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ags-api": {
+      "type": "sse",
+      "url": "https://abtestabdusha262a-game1.prod.gamingservices.accelbyte.io/mcp/abtestabdusha262a-game1"
+    }
+  }
+}
